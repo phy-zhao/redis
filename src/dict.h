@@ -44,6 +44,13 @@
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
+/**
+ * 关系：最外层数据结构为dict（字典，或map），dict持有一个存放了entry地址的hash表
+ * entry包含了key与vlaue
+ * 
+ * */
+
+// 字典entry数据结构
 typedef struct dictEntry {
     void *key;
     union {
@@ -65,7 +72,11 @@ typedef struct dictType {
 } dictType;
 
 /* This is our hash table structure. Every dictionary has two of this as we
- * implement incremental rehashing, for the old to the new table. */
+ * implement incremental rehashing, for the old to the new table. 
+ * 
+ * 哈希表数据结构
+ * 
+ * */
 typedef struct dictht {
     dictEntry **table;
     unsigned long size;
@@ -76,8 +87,8 @@ typedef struct dictht {
 typedef struct dict {
     dictType *type;
     void *privdata;
-    dictht ht[2];
-    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    dictht ht[2];   /* 存放两个哈希表dictht, 大部分情况下用ht[0], 在进行某些操作比如rehash时需要用到ht[1] */
+    long rehashidx; /* 用于rehash操作，!=-1时代表正在rehash. rehashing not in progress if rehashidx == -1 */
     unsigned long iterators; /* number of iterators currently running */
 } dict;
 
@@ -137,6 +148,8 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
         (d)->type->keyCompare((d)->privdata, key1, key2) : \
         (key1) == (key2))
 
+// 宏定义函数,  (dict, key) -> hash
+// hash函数地址存在dict的 type -> hashFunction
 #define dictHashKey(d, key) (d)->type->hashFunction(key)
 #define dictGetKey(he) ((he)->key)
 #define dictGetVal(he) ((he)->v.val)
